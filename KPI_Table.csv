@@ -1,0 +1,26 @@
+﻿ลำดับ,มิติ KPI,คำอธิบาย KPI (สำหรับ CEO),วิธีการคำนวน,ข้อมูลที่ใช้
+1,ยอดขายรวม (Total Revenue),รายได้รวมทั้งหมดจากการขาย,SUM(net_sales_thb),net_sales_thb
+2,ยอดขายเฉลี่ยต่อออร์เดอร์ (Average Order Value),มูลค่าการสั่งซื้อเฉลี่ยต่อครั้ง,SUM(net_sales_thb) / COUNT(DISTINCT order_id),net_sales_thb, order_id
+3,จำนวนออร์เดอร์ (Total Orders),จำนวนคำสั่งซื้อทั้งหมด,COUNT(DISTINCT order_id),order_id
+4,จำนวนสินค้าที่ขาย (Total Items Sold),จำนวนรายการสินค้าที่ขายทั้งหมด,SUM(qty),qty
+5,ยอดขายต่อวัน (Daily Revenue),รายได้เฉลี่ยต่อวัน,SUM(net_sales_thb) / COUNT(DISTINCT order_date),net_sales_thb, order_date
+6,ยอดขายตามช่วงเวลา (Revenue by Time Slot),ยอดขายแต่ละช่วงเวลา,SUM(net_sales_thb) GROUP BY time_slot,net_sales_thb, time_slot
+7,ยอดขายตามวันในสัปดาห์ (Revenue by Day),ยอดขายแต่ละวัน,SUM(net_sales_thb) GROUP BY day_of_week,net_sales_thb, day_of_week
+8,ยอดขายตามช่องทาง (Revenue by Channel),ยอดขายแต่ละช่องทาง,SUM(net_sales_thb) GROUP BY channel,net_sales_thb, channel
+9,ยอดขายตามหมวดหมู่ (Revenue by Category),ยอดขายแต่ละหมวด,SUM(net_sales_thb) GROUP BY category,net_sales_thb, category
+10,สินค้าขายดี Top 10 (Best Sellers),สินค้าที่มียอดขายสูงสุด,SUM(qty) GROUP BY menu_item ORDER BY DESC,menu_item, qty
+11,อัตราการใช้โปรโมชั่น (Promo Usage Rate),% ออร์เดอร์ที่ใช้โปรโมชั่น,COUNT(promo_flag=1) / COUNT(*) * 100,promo_flag
+12,มูลค่าส่วนลดรวม (Total Discount),มูลค่าส่วนลดที่ให้ทั้งหมด,SUM(discount_thb),discount_thb
+13,อัตราลูกค้าใหม่ (New Customer Rate),% ลูกค้าใหม่,COUNT(customer_type='New') / COUNT(*) * 100,customer_type
+14,อัตราลูกค้าประจำ (Returning Customer Rate),% ลูกค้าประจำ,COUNT(customer_type='Returning') / COUNT(*) * 100,customer_type
+15,ยอดขายลูกค้าใหม่ vs ประจำ,เปรียบเทียบยอดขายแต่ละประเภท,SUM(net_sales_thb) GROUP BY customer_type,net_sales_thb, customer_type
+16,Productivity: ออร์เดอร์ต่อชั่วโมง (Orders per Hour),จำนวนออร์เดอร์เฉลี่ยต่อชั่วโมง,COUNT(order_id) / COUNT(DISTINCT hour),order_id, hour
+17,Productivity: ยอดขายต่อชั่วโมง (Revenue per Hour),รายได้เฉลี่ยต่อชั่วโมง,SUM(net_sales_thb) / COUNT(DISTINCT hour),net_sales_thb, hour
+18,Productivity: Items per Order,จำนวนรายการเฉลี่ยต่อออร์เดอร์,SUM(qty) / COUNT(order_id),qty, order_id
+19,Productivity: Peak Hour Analysis,ชั่วโมงที่มียอดขายสูงสุด,SUM(net_sales_thb) GROUP BY hour,net_sales_thb, hour
+20,Productivity: Peak Day Analysis,วันที่มียอดขายสูงสุด,SUM(net_sales_thb) GROUP BY day_of_week,net_sales_thb, day_of_week
+21,Hot vs Iced Ratio,สัดส่วนร้อน/เย็น,COUNT(hot_iced='Hot') / COUNT(hot_iced='Iced'),hot_iced
+22,Size Distribution,สัดส่วนขนาด S/M/L,COUNT(size) GROUP BY size,size
+23,Payment Method Mix,สัดส่วนวิธีการชำระเงิน,COUNT(payment_method) GROUP BY payment_method,payment_method
+24,Add-on Attachment Rate,% ออร์เดอร์ที่มี Add-on,COUNT(add_on<>'') / COUNT(*) * 100,add_on
+25,Top Add-ons,Add-on ที่ขายดี,COUNT(add_on) WHERE add_on<>'' GROUP BY add_on,add_on
