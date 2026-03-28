@@ -6,6 +6,7 @@
     <title>☕ Coffee Shop Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Prompt', sans-serif; }
         body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; font-size: 16px; }
@@ -15,6 +16,9 @@
         
         .filter-bar { max-width: 1550px; margin: 0 auto 20px; padding: 15px 20px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .filter-bar span { color: #fff; font-weight: 500; }
+        .upload-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; background: #00d9ff; border: none; border-radius: 20px; color: #1a1a2e; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; }
+        .upload-btn:hover { background: #00fff5; }
+        .upload-btn input { display: none; }
         .filter-tag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; background: rgba(233,69,96,0.3); border: 1px solid #e94560; border-radius: 20px; color: #fff; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
         .filter-tag:hover { background: rgba(233,69,96,0.5); }
         .filter-tag .remove { width: 18px; height: 18px; background: #e94560; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
@@ -115,7 +119,11 @@
     </div>
     
     <div class="filter-bar">
-        <span>🎯 Active Filters:</span>
+        <label class="upload-btn">
+            📁 Upload Excel
+            <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)">
+        </label>
+        <span style="margin-left:auto;">🎯 Active Filters:</span>
         <div id="activeFilters" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
         <button class="clear-filters" onclick="clearAllFilters()">Clear All</button>
     </div>
@@ -304,6 +312,57 @@
             console.log('Loaded ' + allData.length + ' records');
             initCharts();
             updateDashboard();
+        }
+
+        // Handle Excel file upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                if (jsonData.length > 0) {
+                    // Transform data to match expected format
+                    allData = jsonData.map(row => ({
+                        order_id: row.order_id || row.Order_ID || '',
+                        order_date: row.order_date || row.Order_Date || row.orderDate || '',
+                        day_of_week: row.day_of_week || row.Day_of_Week || row.dayOfWeek || '',
+                        hour: parseInt(row.hour || row.Hour || 0),
+                        time_slot: row.time_slot || row.Time_Slot || row.timeSlot || '',
+                        menu_item: row.menu_item || row.Menu_Item || row.menuItem || '',
+                        category: row.category || row.Category || '',
+                        hot_iced: row.hot_iced || row.Hot_Iced || row.hotIced || '',
+                        size: row.size || row.Size || '',
+                        qty: parseInt(row.qty || row.Qty || row.quantity || row.Quantity || 0),
+                        unit_price_thb: parseFloat(row.unit_price_thb || row.Unit_Price || row.unitPrice || 0),
+                        discount_thb: parseFloat(row.discount_thb || row.Discount || row.discount || 0),
+                        net_sales_thb: parseFloat(row.net_sales_thb || row.Net_Sales || row.netSales || 0),
+                        channel: row.channel || row.Channel || '',
+                        payment_method: row.payment_method || row.Payment_Method || row.paymentMethod || '',
+                        promo_flag: parseInt(row.promo_flag || row.Promo_Flag || row.promoFlag || 0),
+                        customer_type: row.customer_type || row.Customer_Type || row.customerType || '',
+                        add_on: row.add_on || row.Add_On || row.addOn || 'None'
+                    }));
+
+                    // Clear all filters
+                    filters = { time_slot: null, channel: null, day_of_week: null, category: null, hour: null, customer_type: null };
+
+                    console.log('Loaded ' + allData.length + ' records from Excel');
+                    alert('อัปโหลดข้อมูลสำเร็จ! ' + allData.length + ' records');
+                    initCharts();
+                    updateDashboard();
+                } else {
+                    alert('ไม่พบข้อมูลในไฟล์ Excel');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            // Reset file input
+            event.target.value = '';
         }
 
         function getFilteredData() {
